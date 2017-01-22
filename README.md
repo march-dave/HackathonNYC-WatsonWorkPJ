@@ -18,4 +18,3 @@ Depends on:
 * body-parser
 * express
 * request
-* request

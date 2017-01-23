@@ -1,27 +1,45 @@
-import express from 'express';
-import crypto from 'crypto';
-import bodyParser from 'body-parser';
-import zipcode from 'zipcode';
-import request from "request";
-import Wunderground from 'node-weatherunderground';
+// import express from 'express';
+// import crypto from 'crypto';
+// import bodyParser from 'body-parser';
+// import zipcode from 'zipcode';
+// import request from "request";
+// import Wunderground from 'node-weatherunderground';
+// import twilio from 'twilio';
+//
+const express = require('express');
+const crypto = require('crypto');
+const bodyParser = require('body-parser');
+const zipcode = require('zipcode');
+const request = require('request');
+const Wunderground = require('node-weatherunderground');
+const twilio = require('twilio');
 
 // Watson Work Services URL
 const watsonWork = "https://api.watsonwork.ibm.com";
 
 // Application Id, obtained from registering the application at https://developer.watsonwork.ibm.com
-const appId = process.env.WEATHER_CLIENT_ID;
+// const appId = process.env.WEATHER_CLIENT_ID;
+
+// HSERVICE_CLIENT_ID='7c3de83c-5210-416c-9910-7b86189aa9f2'
+// HSERVICE_CLIENT_SECRET='i82cddy5ptlv9k9lfmv2t05zkdg7gb6x'
+// HSERVICE_WEBHOOK_SECRET='523ct5ka1ud52ld565aqbpbhk4qfwedr'
+// HSERVICE_KEY='e2ef67207a596c6a'
+
+const appId = process.env.HSERVICE_CLIENT_ID;
 
 // Application secret. Obtained from registration of application.
-const appSecret = process.env.WEATHER_CLIENT_SECRET;
+// const appSecret = process.env.WEATHER_CLIENT_SECRET;
+const appSecret = process.env.HSERVICE_CLIENT_SECRET;
 
 // Webhook secret. Obtained from registration of a webhook.
-const webhookSecret = process.env.WEATHER_WEBHOOK_SECRET;
+// const webhookSecret = process.env.WEATHER_WEBHOOK_SECRET;
+const webhookSecret = process.env.HSERVICE_WEBHOOK_SECRET;
 
 // Weather Underground API Key
-const weatherUndergroundKey = process.env.WEATHER_KEY;
+const weatherUndergroundKey = process.env.HSERVICE_KEY;
 
 // Keyword to "listen" for when receiving outbound webhook calls.
-const webhookKeyword = "@weather2";
+const webhookKeyword = "@txtmsg";
 
 const zipCodeError = (zc) => {
     return `Hmm, I can't seem to find the weather for ${zc}`;
@@ -153,14 +171,44 @@ const sendMessage = (spaceId, message) => {
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.send('IBM Watson Workspace weather bot is alive and happy!');
+    res.send('IBM Watson Workspace & Hackathon NYC');
+});
+
+app.post('/webhook2', (req, res) => {
+
+
+    const TWILIO_ACCOUNTSID='';
+    const TWILIO_AUTHTOKEN='';
+    // const TWILIO_FROM='15005550006';
+    const TWILIO_FROM='+';
+
+    const client = require('twilio')(TWILIO_ACCOUNTSID, TWILIO_AUTHTOKEN);
+    // let twilioto = req.body.twilioto;
+    // let twiliobody = req.body.twiliobody;
+    var twilioto = '+';
+    var twiliobody = 'Just Hi';
+
+    client.messages.create({
+       to: twilioto,
+       from: TWILIO_FROM,
+       body: twiliobody
+    },  (err, message) => {
+      res.status(err ? 400 : 200).send(err || message);
+    });
+
+    // res.send('IBM Watson Workspace & Hackathon NYC'); return;
 });
 
 // This is callback URI that Watson Workspace will call when there's a new message created
+// app.post('/webhook', (req, res) => {
 app.post('/webhook', validateEvent, (req, res) => {
 
+    // sendMessage('11', successMessage(dfjlasdjfsllfs));
+    // res.send('IBM Watson Workspace & Hackathon NYC'); return;
     // Check if the first part of the message is '@weather'.
     // This lets us "listen" for the '@weather' keyword.
+
+
     if (req.body.content.indexOf(webhookKeyword) != 0) {
         ignoreMessage(res);
         return;
@@ -171,6 +219,34 @@ app.post('/webhook', validateEvent, (req, res) => {
 
     // Id of space where outbound event originated from.
     const spaceId = req.body.spaceId;
+
+    ////////////////////////////////////////////////////////////
+
+    // const TWILIO_ACCOUNTSID = process.env.TWILIO_ACCOUNTSID;
+    // const TWILIO_AUTHTOKEN = process.env.TWILIO_AUTHTOKEN;
+    // const TWILIO_FROM = process.env.TWILIO_FROM;
+    const TWILIO_ACCOUNTSID='';
+    const TWILIO_AUTHTOKEN='';
+    // const TWILIO_FROM='15005550006';
+    const TWILIO_FROM='+';
+
+    const client = require('twilio')(TWILIO_ACCOUNTSID, TWILIO_AUTHTOKEN);
+    // let twilioto = req.body.twilioto;
+    // let twiliobody = req.body.twiliobody;
+    var twilioto = '+12019892302';
+    var twiliobody = 'We will have a meeting at Hack Hall on 2/4/17.';
+
+    client.messages.create({
+       to: twilioto,
+       from: TWILIO_FROM,
+       body: twiliobody
+    },  (err, message) => {
+      res.status(err ? 400 : 200).send(err || message);
+    });
+    // sendMessage(spaceId, successMessage('dlfjdlkjfalsdjflsadjkl')); return;
+    ////////////////////////////////////////////////////////////
+
+
 
     // Parse zipcode from message body.
     // Expected format: <keyword> <zipcode>
